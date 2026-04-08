@@ -12,6 +12,8 @@
 import logging
 import sys
 
+__version__ = "1.0.0"
+
 from boot_screen   import show_boot_screen
 from quick_scan    import QuickScan
 from advanced_scan import AdvancedScan
