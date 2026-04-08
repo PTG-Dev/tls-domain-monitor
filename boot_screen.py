@@ -15,11 +15,31 @@ _AUDIO_FILE = Path(__file__).parent / "more" / "booting.mp3"
 def _play_audio() -> None:
     """Plays booting.mp3 in the background (non-blocking). Silent if unavailable."""
     try:
-        os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-        import pygame
-        pygame.mixer.init()
-        pygame.mixer.music.load(str(_AUDIO_FILE))
-        pygame.mixer.music.play()
+        _platform: str = sys.platform
+        if _platform == "win32":
+            import ctypes
+            winmm = ctypes.windll.winmm
+            path  = str(_AUDIO_FILE).replace("/", "\\")
+            winmm.mciSendStringW(f'open "{path}" type mpegvideo alias bgm', None, 0, None)
+            winmm.mciSendStringW('play bgm', None, 0, None)
+        else:
+            import subprocess
+            _PLAYERS = [
+                ["ffplay",  "-nodisp", "-autoexit", "-loglevel", "quiet"],
+                ["mpg123",  "-q"],
+                ["mpg321",  "-q"],
+                ["mplayer", "-really-quiet"],
+            ]
+            for cmd in _PLAYERS:
+                try:
+                    subprocess.Popen(
+                        cmd + [str(_AUDIO_FILE)],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    break
+                except FileNotFoundError:
+                    continue
     except Exception:
         pass
 

@@ -44,14 +44,13 @@ This tool taps directly into that stream and lets you watch the internet get new
 ## Installation
 
 ```bash
-python -m pip install requests cryptography pygame
+python -m pip install requests cryptography
 ```
 
 | Package | Purpose |
 |---|---|
 | `requests` | HTTP requests to Google CT logs |
 | `cryptography` | Decode DER/X.509 certificates |
-| `pygame` | Play the boot audio (`booting.mp3`) |
 
 > Use `python -m pip` rather than `pip` alone to make sure packages install into the right Python.
 
