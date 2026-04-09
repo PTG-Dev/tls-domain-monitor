@@ -5,7 +5,7 @@ import sys
 import time
 from pathlib import Path
 
-# Enable ANSI escape codes on Windows (no-op on other platforms)
+# Enable ANSI escape codes on Windows (no-op on other platforms.........)
 if sys.platform == "win32":
     os.system("")
 
@@ -56,7 +56,7 @@ _BANNER_LINES = [
     r" #+#    #+# #+#    #+# #+#     #+# #+#   #+#+#",
     r" ########   ########  ###     ### ###    ####",
     r"",
-    r"         :::   :::   :::::::::: v1.1",
+    r"         :::   :::   :::::::::: v1.1.1",
     r"       :+:+: :+:+:  :+:",
     r"     +:+ +:+:+ +:+ +:+",
     r"    +#+  +:+  +#+ +#++:++#",
@@ -107,7 +107,7 @@ def show_boot_screen() -> None:
     sys.stdout.write("\n")
     sys.stdout.flush()
 
-    # Pause 2 seconds before the menu appears
+    # Pause 2 seconds before the menu appears bcs its buggy
     time.sleep(2)
 
     # Switch terminal color to pale mauve for everything that follows

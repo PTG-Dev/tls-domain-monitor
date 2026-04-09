@@ -1,8 +1,13 @@
 # =============================================================================
 # advanced_scan.py — Advanced Scan module
 #
-# Extends the CT log scanner with keyword filtering, scan limits,
-# and HTTP status checks. Parameters are passed via ScanParams.
+# Because “just scanning everything” is so last version
+# This upgraded scanner comes with:
+#   - keyword filtering (a.k.a. Ctrl+F on steroids),
+#   - scan limits (so your CPU doesn’t file a complaint),
+#   - HTTP status checks (because 404s have feelings too).
+#
+# All powered by ScanParams™ — because hardcoding is a crime.
 # =============================================================================
 
 import logging
@@ -25,7 +30,7 @@ _R  = "\033[0m"           # reset
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AdvancedScan — Filtered, configurable CT log scanner
+# AdvancedScan — configurable CT scanner, because chaos needs limits
 # ─────────────────────────────────────────────────────────────────────────────
 
 class AdvancedScan:
@@ -56,7 +61,7 @@ class AdvancedScan:
         self._stop:        bool     = False
         self._output_file           = self._open_output_file() if self.params.output else None
 
-    # ── Output file ─────────────────────────────────────────────────────────
+    # ── Output file thing ─────────────────────────────────────────────────────────
 
     def _open_output_file(self):
         """
@@ -116,7 +121,7 @@ class AdvancedScan:
             f"{_M}{'=' * 60}{_R}\n"
         )
 
-    # ── IP resolve ────────────────────────────────────────────────────────────
+    # ── IP resolve.... ────────────────────────────────────────────────────────────
 
     def _resolve_ip(self, domain: str) -> str:
         """
@@ -176,7 +181,7 @@ class AdvancedScan:
         parts.append(f"SANs={len(record.domains)}")
         return "  ".join(parts)
 
-    # ── Callback ──────────────────────────────────────────────────────────────
+    # ── Callback! ──────────────────────────────────────────────────────────────
 
     def _handle_cert(self, record: CertRecord) -> None:
         """

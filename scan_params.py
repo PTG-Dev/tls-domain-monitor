@@ -123,6 +123,8 @@ class ScanParams:
         Example:
             ScanParams.from_string("scan -k bird -l 10 -e cdn --cert -v -i -o")
         """
+
+        #── i will edit that later ────────────────────────────────
         parser = argparse.ArgumentParser(prog="scan", add_help=False, exit_on_error=False)
         parser.add_argument("-k", "--keyword", dest="keyword", default="")
         parser.add_argument("-l", "--limit",   dest="limit",   type=int, default=0)

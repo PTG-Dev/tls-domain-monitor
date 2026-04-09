@@ -101,12 +101,14 @@ source venv/bin/activate
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
+
 ```
 
 ### IF requirements.txt DOES NOT EXIST
 
 ```bash
 pip install requests cryptography aiohttp
+sudo apt install mpg123
 ```
 
 ## RUN THE PROGRAM
