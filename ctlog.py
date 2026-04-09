@@ -27,9 +27,21 @@ class CertRecord:
     Provides clean string representations for display and debugging.
     """
 
-    def __init__(self, domains: list[str], source: str = "unknown"):
-        self.domains = domains     # List of domains from the certificate
-        self.source = source       # Log source name (e.g. 'Google Argon2025')
+    def __init__(
+        self,
+        domains:   list[str],
+        source:    str = "unknown",
+        issuer:    str = "",
+        not_after: str = "",
+        org:       str = "",
+        country:   str = "",
+    ):
+        self.domains   = domains     # List of domains from the certificate
+        self.source    = source      # Log source name (e.g. 'Google Argon2026')
+        self.issuer    = issuer      # Certificate Authority name
+        self.not_after = not_after   # Expiry date (YYYY-MM-DD)
+        self.org       = org         # Organization from Subject (if present)
+        self.country   = country     # Country from Subject (if present)
 
     def __repr__(self) -> str:
         return f"CertRecord(domains={self.domains!r}, source={self.source!r})"
@@ -112,7 +124,43 @@ class CTLogClient:
             san     = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
             domains = san.value.get_values_for_type(x509.DNSName)
 
-            return CertRecord(domains=list(domains), source=self.LOG_NAME)
+            # Get the cert infos
+            try:
+                cn_attrs = cert.issuer.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
+                issuer   = cn_attrs[0].value if cn_attrs else ""
+            except Exception:
+                issuer = ""
+
+            # Expiry date
+            try:
+                not_after = cert.not_valid_after_utc.strftime("%Y-%m-%d")
+            except AttributeError:
+                not_after = cert.not_valid_after.strftime("%Y-%m-%d")  # type: ignore[attr-defined]
+            except Exception:
+                not_after = ""
+
+            # Subject Organization
+            try:
+                org_attrs = cert.subject.get_attributes_for_oid(x509.NameOID.ORGANIZATION_NAME)
+                org       = org_attrs[0].value if org_attrs else ""
+            except Exception:
+                org = ""
+
+            # Subject Country
+            try:
+                country_attrs = cert.subject.get_attributes_for_oid(x509.NameOID.COUNTRY_NAME)
+                country       = country_attrs[0].value if country_attrs else ""
+            except Exception:
+                country = ""
+
+            return CertRecord(
+                domains   = list(domains),
+                source    = self.LOG_NAME,
+                issuer    = issuer,
+                not_after = not_after,
+                org       = org,
+                country   = country,
+            )
 
         except Exception:
             return None

@@ -2,8 +2,7 @@
 # scan_params.py — Centralized scan parameters (the brain of AdvancedScan)
 #
 # Holds and babysits all runtime options for AdvancedScan.
-# Each flag is a button to a feature; some buttons are just placeholders for now.
-# Think of it like a remote control with a few “coming soon” lights blinking.
+# Each flag is a button to a feature; more buttons added over time.
 # =============================================================================
 
 import argparse
@@ -19,15 +18,21 @@ class ScanParams:
 
     Flags
     ─────
-      keyword  (-k)  Filter: only show domains containing this string.
-      limit    (-l)  Stop after N unique domains. 0 = unlimited.
-      http     (-r)  Show HTTP status code for each domain (planned).
-      regex    (-a)  Filter by regex pattern instead of plain keyword (planned).
+      keyword  (-k / --keyword)  Filter: only show domains containing this string.
+      limit    (-l / --limit)    Stop after N unique domains. 0 = unlimited.
+      http     (-r / --http)     Show HTTP status code for each domain.
+      exclude  (-e / --exclude)  Skip domains containing this word (ex: cdn, mail).
+      cert     (--cert)          Show basic cert info: issuer + expiry date.
+      verbose  (-v / --verbose)  With --cert, also show org + country + SAN count.
+      ip       (-i / --ip)       Resolve and show the IP address of each domain.
+      output   (-o / --output)   Save results to a timestamped file in outputlogs/.
 
     Usage
     ─────
-        params = ScanParams(keyword="bird", limit=10)
-        params = ScanParams()          # all defaults → unlimited, no filter
+        params = ScanParams(keyword="bird", limit=10, exclude="cdn")
+        params = ScanParams(cert=True, verbose=True)   # full cert details
+        params = ScanParams(ip=True, output=True)      # resolve IPs + save to file
+        params = ScanParams()                          # all defaults → unlimited, no filter
     """
 
     def __init__(
@@ -35,12 +40,20 @@ class ScanParams:
         keyword: str  = "",
         limit:   int  = 0,
         http:    bool = False,
-        regex:   str  = "",
+        exclude: str  = "",
+        cert:    bool = False,
+        verbose: bool = False,
+        ip:      bool = False,
+        output:  bool = False,
     ):
         self.keyword = keyword.lower().strip()
         self.limit   = max(0, limit)
-        self.http    = http      # placeholder!! not yet implemented
-        self.regex   = regex     # placeholder!!! not yet
+        self.http    = http
+        self.exclude = exclude.lower().strip()
+        self.cert    = cert
+        self.verbose = verbose
+        self.ip      = ip
+        self.output  = output
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -52,13 +65,23 @@ class ScanParams:
         """Returns True if a scan limit is set."""
         return self.limit > 0
 
+    def has_exclude(self) -> bool:
+        """Returns True if an exclusion filter is active."""
+        return bool(self.exclude)
+
     def matches(self, domain: str) -> bool:
         """
-        Returns True if the domain passes the active filters.
-        Currently checks keyword only; regex support is planned.
+        Returns True if the domain passes all active filters.
+        Checks keyword inclusion and word exclusion.
         """
-        if self.has_keyword() and self.keyword not in domain.lower():
+        domain_lower = domain.lower()
+
+        if self.has_keyword() and self.keyword not in domain_lower:
             return False
+
+        if self.has_exclude() and self.exclude in domain_lower:
+            return False
+
         return True
 
     def summary(self) -> str:
@@ -70,14 +93,22 @@ class ScanParams:
             parts.append(f"limit={self.limit}")
         if self.http:
             parts.append("http=on")
-        if self.regex:
-            parts.append(f"regex='{self.regex}'")
+        if self.has_exclude():
+            parts.append(f"exclude='{self.exclude}'")
+        if self.cert:
+            parts.append("cert=on" + " (verbose)" if self.verbose else "cert=on")
+        if self.ip:
+            parts.append("ip=on")
+        if self.output:
+            parts.append("output=on")
         return "  ".join(parts) if parts else "no filters"
 
     def __repr__(self) -> str:
         return (
             f"ScanParams(keyword={self.keyword!r}, limit={self.limit}, "
-            f"http={self.http}, regex={self.regex!r})"
+            f"http={self.http}, exclude={self.exclude!r}, "
+            f"cert={self.cert}, verbose={self.verbose}, "
+            f"ip={self.ip}, output={self.output})"
         )
 
     # ── Factory ───────────────────────────────────────────────────────────────
@@ -86,17 +117,21 @@ class ScanParams:
     def from_string(cls, line: str) -> "ScanParams | None":
         """
         Parses a 'scan' command string into a ScanParams instance.
-        Syntax: scan [-k keyword] [-l limit] [-r] [-a regex]
+        Syntax: scan [-k keyword] [-l limit] [-r] [-e exclude] [--cert] [-v] [-i] [-o]
         Returns None if parsing fails.
 
         Example:
-            ScanParams.from_string("scan -k bird -l 10")
+            ScanParams.from_string("scan -k bird -l 10 -e cdn --cert -v -i -o")
         """
         parser = argparse.ArgumentParser(prog="scan", add_help=False, exit_on_error=False)
-        parser.add_argument("-k", dest="keyword", default="")
-        parser.add_argument("-l", dest="limit",   type=int, default=0)
-        parser.add_argument("-r", dest="http",    action="store_true")
-        parser.add_argument("-a", dest="regex",   default="")
+        parser.add_argument("-k", "--keyword", dest="keyword", default="")
+        parser.add_argument("-l", "--limit",   dest="limit",   type=int, default=0)
+        parser.add_argument("-r", "--http",    dest="http",    action="store_true")
+        parser.add_argument("-e", "--exclude", dest="exclude", default="")
+        parser.add_argument(       "--cert",   dest="cert",    action="store_true")
+        parser.add_argument("-v", "--verbose", dest="verbose", action="store_true")
+        parser.add_argument("-i", "--ip",      dest="ip",      action="store_true")
+        parser.add_argument("-o", "--output",  dest="output",  action="store_true")
 
         try:
             tokens = shlex.split(line)
@@ -107,7 +142,11 @@ class ScanParams:
                 keyword = args.keyword,
                 limit   = args.limit,
                 http    = args.http,
-                regex   = args.regex,
+                exclude = args.exclude,
+                cert    = args.cert,
+                verbose = args.verbose,
+                ip      = args.ip,
+                output  = args.output,
             )
         except (argparse.ArgumentError, SystemExit, ValueError):
             return None

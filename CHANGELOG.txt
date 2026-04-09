@@ -1,0 +1,86 @@
+CHANGELOG — SCAN ME / Certificate Transparency Monitor
+=======================================================
+──────────────────────────────────────────────────────
+  v1.1.0  (2026-04-09)  — Feature update
+──────────────────────────────────────────────────────
+
+  NEW
+  ───
+  • Added long aliases (--) for all existing flags
+      -k / --keyword
+      -l / --limit
+      -r / --http
+      -e / --exclude
+
+  • Added --cert flag
+    Show basic cert info per domain: issuer + expiry date.
+    Ex: scan --cert
+
+  • Added -v / --verbose flag
+    When combined with --cert, also shows org, country and SAN count.
+    Ex: scan --cert -v
+
+    •  Added -e / --exclude flag
+    Skip domains that contain a specific word.
+    Ex: scan -k bank -e cdn -l 20 -r
+
+
+    • Added -i / --ip flag
+    Resolve and display the IPv4 address of each domain.
+    Ex: scan -i
+
+    • Added -o / --output flag
+    Save all matched domains and metadata to a timestamped .txt file
+    in outputlogs/. Filename format: YYYY-MM-DD_HH-MM-SS.txt
+    Ex: scan -o
+
+  CHANGED
+  ───────
+  • ctlog.py — CertRecord now stores issuer, not_after, org, country
+    extracted directly from the X.509 certificate
+  • scan_params.py — new params: cert, verbose — long aliases added to
+    all existing args in from_string()
+  • advanced_scan.py — new methods _format_cert_info() and
+    _format_cert_verbose() — _handle_cert() displays cert info when active
+  • main.py — help menu updated with long aliases and --cert / -v entries
+  • README.md — features list, examples and flags table updated
+
+
+  • scan_params.py — new `exclude` parameter with has_exclude() and
+    updated matches() to apply exclusion filter
+  • advanced_scan.py — docstring updated to mention -e
+  • main.py — help menu now shows -e with example
+  • README.md — features list, scan examples and flags table updated
+
+
+  • scan_params.py — new params ip and output
+  • advanced_scan.py — new methods _resolve_ip(), _open_output_file(),
+    _write_to_file() — output file closed properly on scan end
+  • main.py — help menu updated with -i and -o entries
+  • README.md — examples and flags table updated
+  
+
+
+──────────────────────────────────────────────────────
+  v1.0.1  (2026-04-08)  — Bugfix release
+──────────────────────────────────────────────────────
+
+  FIXED
+  ─────
+  • Removed pygame dependency — was breaking on newer Python versions.
+    Replaced with ctypes (winmm) on Windows and subprocess fallback
+    (ffplay / mpg123 / mpg321 / mplayer) on Linux.
+  • Removed unimplemented -a / --regex parameter from scan_params.py
+  • Removed placeholder comments on -r / --http (feature was already working)
+
+
+──────────────────────────────────────────────────────
+  v1.0.0  (2026-04-07)  — Initial release
+──────────────────────────────────────────────────────
+
+  • Real-time CT log feed via Google Argon2026
+  • Keyword filter (-k)
+  • Scan limit (-l)
+  • HTTP status check (-r)
+  • Animated boot screen with audio
+  • Styled terminal UI (ANSI colors)

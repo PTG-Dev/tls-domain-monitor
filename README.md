@@ -25,9 +25,12 @@ This tool taps directly into that stream and lets you watch the internet get new
 ## Features
 
 - **Live CT log feed** — polls Google's Argon2026 CT log continuously
-- **Keyword filter** (`-k`) — only see domains that match a word
-- **Scan limit** (`-l`) — stop automatically after N domains
-- **HTTP status check** (`-r`) — see the live HTTP response code for each domain
+- **Keyword filter** (`-k` / `--keyword`) — only see domains that match a word
+- **Exclude filter** (`-e` / `--exclude`) — skip domains containing a word (ex: cdn, mail)
+- **Scan limit** (`-l` / `--limit`) — stop automatically after N domains
+- **HTTP status check** (`-r` / `--http`) — see the live HTTP response code for each domain
+- **Cert info** (`--cert`) — show issuer + expiry date for each certificate
+- **Verbose cert** (`--cert -v`) — also show org, country, and SAN count
 - **Animated boot screen** with audio
 - **Styled terminal UI** — clean ANSI colors, no external UI framework
 
@@ -56,6 +59,71 @@ python -m pip install requests cryptography
 
 ---
 
+# Linux Installation Guide
+
+## INSTALLING BASE TOOLS
+
+```bash
+sudo apt update
+sudo apt install python3 python3-pip python3-venv git -y
+```
+
+## VERIFICATION
+
+```bash
+python3 --version
+pip3 --version
+git --version
+```
+
+## CLONE THE PROJECT
+
+```bash
+cd ~
+git clone https://github.com/PTG-Dev/tls-domain-monitor.git
+cd tls-domain-monitor
+```
+
+## CREATE A VIRTUAL ENVIRONMENT
+
+```bash
+python3 -m venv venv
+```
+
+## ACTIVATE THE ENVIRONMENT
+
+```bash
+source venv/bin/activate
+```
+
+## INSTALL DEPENDENCIES
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### IF requirements.txt DOES NOT EXIST
+
+```bash
+pip install requests cryptography aiohttp
+```
+
+## RUN THE PROGRAM
+
+```bash
+ls
+python main.py
+```
+
+### OR DEPENDING ON AVAILABLE FILE
+
+```bash
+python3 main.py
+```
+
+
+
 ## Usage
 
 ```bash
@@ -77,20 +145,31 @@ python main.py
 Type directly into the prompt:
 
 ```bash
-scan                        # all domains, unlimited
-scan -k bird                # only domains containing "bird"
-scan -l 20                  # stop after 20 domains
-scan -r                     # show HTTP status per domain
-scan -k bank -l 50 -r       # combine all flags
+scan                                    # all domains, unlimited
+scan -k bird                            # only domains containing "bird"
+scan --keyword bird                     # same with long flag
+scan -l 20                              # stop after 20 domains
+scan -r                                 # show HTTP status per domain
+scan -e cdn                             # skip domains containing "cdn"
+scan --cert                             # show issuer + expiry date
+scan --cert -v                          # show full cert info
+scan -i                                 # resolve and show IP address
+scan -o                                 # save results to outputlogs/
+scan -k bank -e cdn -l 50 -r --cert -i -o  # combine flags
 ```
 
 ### Flags
 
-| Flag | Description |
-|---|---|
-| `-k keyword` | Filter — only show domains containing this word |
-| `-l N` | Stop automatically after N unique domains |
-| `-r` | Fetch and show the HTTP status code for each domain |
+| Flag | Long | Description |
+|---|---|---|
+| `-k word` | `--keyword` | Filter — only show domains containing this word |
+| `-e word` | `--exclude` | Exclude — skip domains containing this word |
+| `-l N` | `--limit` | Stop automatically after N unique domains |
+| `-r` | `--http` | Fetch and show the HTTP status code for each domain |
+| | `--cert` | Show cert info — issuer + expiry date |
+| `-v` | `--verbose` | With `--cert`: also show org, country, SAN count |
+| `-i` | `--ip` | Resolve and show the IP address of each domain |
+| `-o` | `--output` | Save results to a timestamped file in `outputlogs/` |
 
 ---
 
