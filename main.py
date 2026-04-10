@@ -138,7 +138,7 @@ class Menu:
             while msvcrt.kbhit():
                 msvcrt.getch()
 
-    # ── Input handler ─────────────────────────────────────────────────────────
+    # ── input handler — blocking on stdin like it's still 1979 ────────────────
 
     def _get_choice(self) -> str:
         """
@@ -200,7 +200,7 @@ class Menu:
                 print()
                 return True
 
-    # ── Main loop ─────────────────────────────────────────────────────────────
+    # ── main loop — the while True that holds this entire program together ─────
 
     def run(self) -> None:
         """

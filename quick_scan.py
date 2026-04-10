@@ -27,15 +27,15 @@ class QuickScan:
     - Displays a running counter
     - Stops cleanly on CTRL+C
     """
-
+ #SOC engineer who codes like a dev but thinks like a threat hunter
     def __init__(self):
         # Set to store unique domains and avoid duplicate output
         self.seen_domains: set[str] = set()
 
-        # Total number of unique domains discovered so far
+        # the only KPI this tool exports — no dashboards, no JIRA ticket, just an int
         self.domain_count: int = 0
 
-    # ── Display helpers ───────────────────────────────────────────────────────
+    # ── display helpers — all roads lead to print() ──────────────────────────
 
     def _print_header(self) -> None:
         """Prints the scan session header."""
@@ -55,7 +55,7 @@ class QuickScan:
         _R = "\033[0m"
         print(f"  {_M}[{_R}{self.domain_count:>6}{_M}]{_R}  {domain:<50}  ({source})")
 
-    # ── Callback ──────────────────────────────────────────────────────────────
+    # ── callback — IoC pattern: we give the client our function, it abuses our CPU
 
     def _handle_cert(self, record: CertRecord) -> None:
         """
@@ -68,7 +68,7 @@ class QuickScan:
             # Skip wildcard prefixes (*.example.com → keep example.com clean)
             clean_domain = domain.lstrip("*.")
 
-            # Skip empty or already-seen domains
+            # dedup gate: if you've seen one cdn-edge-node-42.fastly.net, you've seen them all
             if not clean_domain or clean_domain in self.seen_domains:
                 continue
 

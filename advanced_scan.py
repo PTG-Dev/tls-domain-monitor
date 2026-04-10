@@ -121,7 +121,7 @@ class AdvancedScan:
             f"{_M}{'=' * 60}{_R}\n"
         )
 
-    # ── IP resolve.... ────────────────────────────────────────────────────────────
+    # ── IP resolve — gethostbyname() doing its best Shodan impression ──────────────────────
 
     def _resolve_ip(self, domain: str) -> str:
         """

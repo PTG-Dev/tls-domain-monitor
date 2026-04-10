@@ -68,9 +68,9 @@ _BANNER_LINES = [
     r"  Powered by Google CT Log — ct.googleapis.com",
 ]
 
-# Delay between frames (seconds). Lower = faster animation.
+# frame budget: 55ms/column — smoother than most Electron apps at 1/100th the RAM footprint
 _FRAME_DELAY = 0.055
-_STEP        = 2      # columns revealed per frame
+_STEP        = 2      # 2 cols/tick: fast enough to look intentional, slow enough for the mp3 to load
 
 
 def show_boot_screen() -> None:
@@ -79,7 +79,7 @@ def show_boot_screen() -> None:
     left-to-right in pale blue, waits 2 seconds, then switches the
     terminal color to dark pink for all subsequent output.
     """
-    # Clear the terminal
+    # scorched-earth UX: nuke the terminal, rebuild from ASCII art, no survivors
     os.system("cls" if sys.platform == "win32" else "clear")
 
     _play_audio()
@@ -88,13 +88,13 @@ def show_boot_screen() -> None:
     n_lines   = len(_BANNER_LINES)
     padded    = [line.ljust(max_width) for line in _BANNER_LINES]
 
-    # Build column checkpoints: 0, 2, 4, ..., max_width
+    # precompute animation keyframes: range() as a timeline — After Effects wasn't in the budget
     cols = list(range(0, max_width, _STEP)) + [max_width]
 
     sys.stdout.write("\n")
 
     for frame, col in enumerate(cols):
-        # From the second frame onward, move cursor back up to redraw
+        # \033[nA: rewind cursor n lines — the closest Python gets to double-buffering a terminal
         if frame > 0:
             sys.stdout.write(f"\033[{n_lines}A")
 
@@ -107,7 +107,7 @@ def show_boot_screen() -> None:
     sys.stdout.write("\n")
     sys.stdout.flush()
 
-    # Pause 2 seconds before the menu appears bcs its buggy
+    # mandatory 2s hold: the audience needs to appreciate the art, also this fixes an mp3 desync bug
     time.sleep(2)
 
     # Switch terminal color to pale mauve for everything that follows

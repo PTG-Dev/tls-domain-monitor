@@ -1,5 +1,5 @@
 # =============================================================================
-# ctlog.py — Certificate Transparency log client (dev note: sleep is optional)
+# ctlog.py — the internet's keyhole: legally surveils every new TLS certificate
 #
 # Polls the Google Argon CT log directly (because why not go straight to the source).
 # Parses incoming certificates and extracts fresh domains hot off the wire.
@@ -77,7 +77,7 @@ class CTLogClient:
         self.on_new_cert  = on_new_cert
         self._last_index  = None
 
-    # ── CT log HTTP helpers (im lost..) ───────────────────────────────────────────────────
+    # ── CT log REST helpers — 2 endpoints, 1 useful JSON key, infinite DER pain ────────────
 
     def _get_tree_size(self) -> int:
         """Returns the current number of entries in the CT log."""
@@ -131,7 +131,7 @@ class CTLogClient:
             except Exception:
                 issuer = ""
 
-            # Expiry date
+            # not_valid_after: the timestamp that causes a 3am incident nobody predicted
             try:
                 not_after = cert.not_valid_after_utc.strftime("%Y-%m-%d")
             except AttributeError:
@@ -139,14 +139,14 @@ class CTLogClient:
             except Exception:
                 not_after = ""
 
-            # Subject Organization
+            # Subject.O: legal name of whoever will forget to renew this cert
             try:
                 org_attrs = cert.subject.get_attributes_for_oid(x509.NameOID.ORGANIZATION_NAME)
                 org       = org_attrs[0].value if org_attrs else ""
             except Exception:
                 org = ""
 
-            # Subject Country
+            # Subject.C: two letters that were accurate when the cert was issued — probably
             try:
                 country_attrs = cert.subject.get_attributes_for_oid(x509.NameOID.COUNTRY_NAME)
                 country       = country_attrs[0].value if country_attrs else ""
@@ -165,7 +165,7 @@ class CTLogClient:
         except Exception:
             return None
 
-    # ── Entry something ───────────────────────────────────────────────────────────
+    # ── start() — the function that never returns unless something has gone wrong ──
 
     def start(self) -> None:
         """
