@@ -5,7 +5,7 @@
 # to wherever they think they know what they're doing:
 #
 #   1. Quick Scan        → real-time domain discovery via CT logs
-#   2. Advanced Options  → coming soon (probably)
+#   2. Advanced Options  → some stuff
 #   3. Exit              → graceful escape
 # =============================================================================
 
