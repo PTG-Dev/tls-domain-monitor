@@ -5,7 +5,7 @@
 # to wherever they think they know what they're doing:
 #
 #   1. Quick Scan        → real-time domain discovery via CT logs
-#   2. Advanced Options  → some stuff
+#   2. Help               → scan commands & flags reference
 #   3. Exit              → graceful escape
 # =============================================================================
 
